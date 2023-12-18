@@ -454,7 +454,7 @@ class king(pieces):
                         RookSquare = string.ascii_uppercase[5] + x.square[1]
                     elif (x.square[0] == "A" and horizontal == -2):
                         Rook = x
-                        RookSquare = string.ascii_uppercase[2] + x.square[1]
+                        RookSquare = string.ascii_uppercase[3] + x.square[1]
                     else:
                         valid == False
             if valid == True:
