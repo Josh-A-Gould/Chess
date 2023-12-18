@@ -223,6 +223,108 @@ class pieces(pygame.sprite.Sprite):
                     x.kill()
             turn = "White"
 
+    def ValidOrthogonalMove(self, newSquare):
+        valid = True
+
+        Xcoord = string.ascii_uppercase.index(self.square[0])
+        Ycoord = int(self.square[1])
+
+        horizontal = string.ascii_uppercase.index(newSquare[0]) - Xcoord
+        vertical = int(newSquare[1]) - Ycoord
+
+        if horizontal != abs(horizontal):
+            A = -1
+        else:
+            A = 1
+        if vertical != abs(vertical):
+            B = -1
+        else:
+            B = 1
+
+        horizontal = abs(horizontal)
+        vertical = abs(vertical)
+
+        if horizontal * vertical != 0 or (horizontal == 0 and vertical == 0):
+            valid = False
+
+        if horizontal != 0 and valid == True:
+            h = range(horizontal)
+            for dist in h[1::]:
+                for x in all_pieces_list:
+                    if (string.ascii_uppercase[A*dist+Xcoord]+self.square[1] == x.on_mouseclick()):
+                        valid = False 
+            for x in all_pieces_list:
+                if (newSquare == x.on_mouseclick() and x.colour != self.colour):
+                    captured = x
+                if (string.ascii_uppercase[A*horizontal+Xcoord]+self.square[1] == x.on_mouseclick() and x.colour == self.colour):
+                    valid = False
+
+        elif vertical != 0 and valid == True:
+            v = range(vertical)
+            for dist in v[1::]:
+                for x in all_pieces_list:
+                    if (self.square[0]+str(B*dist+Ycoord) == x.on_mouseclick()):
+                        valid = False
+            for x in all_pieces_list:
+                if (newSquare == x.on_mouseclick() and x.colour != self.colour):
+                    captured = x
+                if (self.square[0]+str(B*vertical+Ycoord) == x.on_mouseclick() and x.colour == self.colour):
+                    valid = False
+
+        if valid == True:
+            self.UpdateSquare(newSquare)
+            try:
+                captured.kill()
+            except UnboundLocalError:
+                pass 
+
+            return valid 
+
+    def ValidDiagonalMove(self, newSquare):
+        valid = True
+
+        Xcoord = string.ascii_uppercase.index(self.square[0])
+        Ycoord = int(self.square[1])
+
+        horizontal = string.ascii_uppercase.index(newSquare[0]) - Xcoord
+        vertical = int(newSquare[1]) - Ycoord
+
+        if horizontal != abs(horizontal):
+            A = -1
+        else:
+            A = 1
+        if vertical != abs(vertical):
+            B = -1
+        else:
+            B = 1
+
+        if abs(horizontal) != abs(vertical):
+            valid = False
+
+        else:
+            h = range(abs(horizontal))
+            v = range(abs(vertical))
+
+            for hdist, vdist in zip(h[1::], v[1::]):
+                for x in all_pieces_list:
+                    if (string.ascii_uppercase[A*hdist+Xcoord]+str(B*vdist+Ycoord) == x.on_mouseclick()):
+                        valid = False
+            
+            for x in all_pieces_list:
+                if (newSquare == x.on_mouseclick() and x.colour != self.colour):
+                    captured = x
+                if (string.ascii_uppercase[horizontal+Xcoord]+str(vertical+Ycoord) == x.on_mouseclick() and x.colour == self.colour):
+                    valid = False
+
+        if valid == True:
+            self.UpdateSquare(newSquare)
+            try:
+                captured.kill()
+            except UnboundLocalError:
+                pass  
+
+            return valid
+
 class pawn(pieces):
     def __init__(self, square, moved, colour):
         super().__init__(square, moved, colour, "Pawn")
@@ -289,62 +391,10 @@ class pawn(pieces):
 
 class rook(pieces):
     def __init__(self, square, moved, colour):
-        super().__init__(square, moved, colour, "Rook")
+        super().__init__(square, moved, colour, "Rook")      
 
     def ValidMove(self, newSquare):
-        valid = True
-
-        Xcoord = string.ascii_uppercase.index(self.square[0])
-        Ycoord = int(self.square[1])
-
-        horizontal = string.ascii_uppercase.index(newSquare[0]) - Xcoord
-        vertical = int(newSquare[1]) - Ycoord
-
-        if horizontal != abs(horizontal):
-            A = -1
-        else:
-            A = 1
-        if vertical != abs(vertical):
-            B = -1
-        else:
-            B = 1
-
-        horizontal = abs(horizontal)
-        vertical = abs(vertical)
-
-        if horizontal * vertical != 0 or (horizontal == 0 and vertical == 0):
-            valid = False
-
-        if horizontal != 0 and valid == True:
-            h = range(horizontal)
-            for dist in h[1::]:
-                for x in all_pieces_list:
-                    if (string.ascii_uppercase[A*dist+Xcoord]+self.square[1] == x.on_mouseclick()):
-                        valid = False 
-            for x in all_pieces_list:
-                if (newSquare == x.on_mouseclick() and x.colour != self.colour):
-                    captured = x
-                if (string.ascii_uppercase[A*horizontal+Xcoord]+self.square[1] == x.on_mouseclick() and x.colour == self.colour):
-                    valid = False
-
-        elif vertical != 0 and valid == True:
-            v = range(vertical)
-            for dist in v[1::]:
-                for x in all_pieces_list:
-                    if (self.square[0]+str(B*dist+Ycoord) == x.on_mouseclick()):
-                        valid = False
-            for x in all_pieces_list:
-                if (newSquare == x.on_mouseclick() and x.colour != self.colour):
-                    captured = x
-                if (self.square[0]+str(B*vertical+Ycoord) == x.on_mouseclick() and x.colour == self.colour):
-                    valid = False
-        
-        if valid == True:
-            self.UpdateSquare(newSquare)
-            try:
-                captured.kill()
-            except UnboundLocalError:
-                pass            
+        self.ValidOrthogonalMove(newSquare)    
 
 class knight(pieces):
     def __init__(self, square, moved, colour):
@@ -380,13 +430,77 @@ class bishop(pieces):
     def __init__(self, square, moved, colour):
         super().__init__(square, moved, colour, "Bishop")
 
+    def ValidMove(self, newSquare):
+        self.ValidDiagonalMove(newSquare)
+
 class king(pieces):
-       def __init__(self, square, moved, colour):
+    def __init__(self, square, moved, colour):
         super().__init__(square, moved, colour, "King") 
+
+    def ValidMove(self, newSquare):
+        valid = True
+
+        Xcoord = string.ascii_uppercase.index(self.square[0])
+        Ycoord = int(self.square[1])
+
+        horizontal = string.ascii_uppercase.index(newSquare[0]) - Xcoord
+        vertical = int(newSquare[1]) - Ycoord
+
+        if (self.moved == False and abs(horizontal) == 2):
+            for x in all_pieces_list:
+                if (x.colour == self.colour and x.piece == "Rook" and x.moved == False):
+                    if (x.square[0] == "H" and horizontal == 2):
+                        Rook = x
+                        RookSquare = string.ascii_uppercase[5] + x.square[1]
+                    elif (x.square[0] == "A" and horizontal == -2):
+                        Rook = x
+                        RookSquare = string.ascii_uppercase[2] + x.square[1]
+                    else:
+                        valid == False
+            if valid == True:
+                try:
+                    valid = self.ValidOrthogonalMove(newSquare)
+                except UnboundLocalError:
+                    valid = False
+            if valid == True:
+                Rook.UpdateSquare(RookSquare)
+                Rook.UpdateSquare(RookSquare)
+
+
+        if (horizontal**2 + vertical**2) > 2:
+            valid = False
+        
+        else:
+            if (horizontal == 0 or vertical == 0):
+                self.ValidOrthogonalMove(newSquare)
+
+            elif abs(horizontal) == abs(vertical):
+                self.ValidDiagonalMove(newSquare)
+
+            else:
+                pass
 
 class queen(pieces):
     def __init__(self, square, moved, colour):
         super().__init__(square, moved, colour, "Queen")
+
+    def ValidMove(self, newSquare):        
+        valid = True
+
+        Xcoord = string.ascii_uppercase.index(self.square[0])
+        Ycoord = int(self.square[1])
+
+        horizontal = string.ascii_uppercase.index(newSquare[0]) - Xcoord
+        vertical = int(newSquare[1]) - Ycoord
+
+        if (horizontal == 0 or vertical == 0):
+            self.ValidOrthogonalMove(newSquare)
+
+        elif abs(horizontal) == abs(vertical):
+            self.ValidDiagonalMove(newSquare)
+
+        else:
+            pass
 
 init() 
 
