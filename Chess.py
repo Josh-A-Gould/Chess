@@ -223,6 +223,8 @@ class pieces(pygame.sprite.Sprite):
                     x.kill()
             turn = "White"
 
+        return True
+
     def ValidOrthogonalMove(self, newSquare):
         valid = True
 
@@ -505,6 +507,7 @@ class queen(pieces):
 init() 
 
 piece_selected = False
+Move = False
 
 while running:
     events = pygame.event.get()
@@ -520,16 +523,29 @@ while running:
                 if ((xsq+str(ysq) == x.on_mouseclick()) and turn == x.colour):
                     selected_piece = x
                     piece_selected = True
+                    Move = True
                     
         if event.type == pygame.MOUSEBUTTONUP:
             if piece_selected == True:
                 xpos, ypos = pygame.mouse.get_pos()
                 xsq = string.ascii_uppercase[m.floor((xpos-40)/80)]
                 ysq = 8-m.floor((ypos-40)/80)
-                
-                if (0 < ysq < 9 and 0 <= string.ascii_uppercase.index(xsq) < 8):
+
+                for x in all_pieces_list:
+                    if ((xsq+str(ysq) == x.on_mouseclick()) and turn == x.colour):
+                        if selected_piece == x:
+                            Move = False
+
+                    else:
+                        Move = True
+
+                if (0 < ysq < 9 and 0 <= string.ascii_uppercase.index(xsq) < 8 and Move == True):
+                    start = selected_piece.GetCoords()
                     selected_piece.ValidMove(xsq+str(ysq))
-                piece_selected = False
+                    end = selected_piece.GetCoords()
+                    if start != end:
+                        piece_selected = False
+                        Move = False
             else:
                 pass
 
