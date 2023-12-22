@@ -448,19 +448,24 @@ class king(pieces):
         horizontal = string.ascii_uppercase.index(newSquare[0]) - Xcoord
         vertical = int(newSquare[1]) - Ycoord
 
-        if (self.moved == False and abs(horizontal) == 2):
+        if (self.moved == False and abs(horizontal) >= 2):
             for x in all_pieces_list:
                 if (x.colour == self.colour and x.piece == "Rook" and x.moved == False):
-                    if (x.square[0] == "H" and horizontal == 2):
+                    if (x.square[0] == "H" and (horizontal == 2 or horizontal == 3)):
                         Rook = x
                         RookSquare = string.ascii_uppercase[5] + x.square[1]
-                    elif (x.square[0] == "A" and horizontal == -2):
+                    elif (x.square[0] == "A" and (horizontal == -2 or horizontal == -4)):
                         Rook = x
                         RookSquare = string.ascii_uppercase[3] + x.square[1]
                     else:
                         valid == False
             if valid == True:
                 try:
+                    if horizontal == 3:
+                        horizontal = 2
+                    if horizontal == -4:
+                        horizontal = -2
+                    newSquare = string.ascii_uppercase[Xcoord+horizontal] + self.square[1]
                     valid = self.ValidOrthogonalMove(newSquare)
                 except UnboundLocalError:
                     valid = False
@@ -508,6 +513,7 @@ init()
 
 piece_selected = False
 Move = False
+Castling = False
 
 while running:
     events = pygame.event.get()
@@ -515,16 +521,24 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
+            try:
+                if (selected_piece.piece == "King" and selected_piece.moved == False):
+                    Castling = True
+                else:
+                    Castling = False
+            except NameError:
+                pass
             xpos, ypos = pygame.mouse.get_pos()
             xsq = string.ascii_uppercase[m.floor((xpos-40)/80)]
             ysq = 8-m.floor((ypos-40)/80)
 
-            for x in all_pieces_list:
-                if ((xsq+str(ysq) == x.on_mouseclick()) and turn == x.colour):
-                    selected_piece = x
-                    piece_selected = True
-                    Move = True
-                    
+            if Castling == False:
+                for x in all_pieces_list:
+                    if ((xsq+str(ysq) == x.on_mouseclick()) and turn == x.colour):
+                        selected_piece = x
+                        piece_selected = True
+                        Move = True
+                        
         if event.type == pygame.MOUSEBUTTONUP:
             if piece_selected == True:
                 xpos, ypos = pygame.mouse.get_pos()
