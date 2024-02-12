@@ -327,6 +327,10 @@ class pieces(pygame.sprite.Sprite):
 
             return valid
 
+    def CheckChecker(self, newSquare):
+        #Need a way of checking if the new position would leave the king under attack
+        pass
+
 class pawn(pieces):
     def __init__(self, square, moved, colour):
         super().__init__(square, moved, colour, "Pawn")
